@@ -1,0 +1,310 @@
+"""
+Sistema de Reservas de Hotel - Fase 4
+Curso: Programación 213023 - UNAD
+Autor: Daniel Alejandro Guio
+Descripción: Sistema con manejo robusto de excepciones, logging y simulaciones.
+"""
+
+import logging
+import random
+from datetime import datetime, timedelta
+
+# ─────────────────────────────────────────────
+# CONFIGURACIÓN DE LOGGING
+# ─────────────────────────────────────────────
+logging.basicConfig(
+    filename="hotel_log.txt",
+    level=logging.DEBUG,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
+
+# ─────────────────────────────────────────────
+# EXCEPCIONES PERSONALIZADAS
+# ─────────────────────────────────────────────
+
+class HotelException(Exception):
+    """Excepción base del sistema hotelero."""
+    pass
+
+class HabitacionNoDisponibleError(HotelException):
+    """Se lanza cuando la habitación solicitada no está disponible."""
+    def __init__(self, numero_habitacion):
+        self.numero_habitacion = numero_habitacion
+        super().__init__(f"La habitación {numero_habitacion} no está disponible.")
+
+class ReservaInvalidaError(HotelException):
+    """Se lanza cuando los datos de la reserva son inválidos."""
+    def __init__(self, motivo):
+        super().__init__(f"Reserva inválida: {motivo}")
+
+class ClienteNoEncontradoError(HotelException):
+    """Se lanza cuando el cliente no existe en el sistema."""
+    def __init__(self, nombre_cliente):
+        super().__init__(f"Cliente '{nombre_cliente}' no encontrado en el sistema.")
+
+class ServicioNoDisponibleError(HotelException):
+    """Se lanza cuando un servicio del hotel no está operativo."""
+    def __init__(self, servicio):
+        super().__init__(f"El servicio '{servicio}' no está disponible en este momento.")
+
+class PagoFallidoError(HotelException):
+    """Se lanza cuando el procesamiento de pago falla."""
+    def __init__(self, monto):
+        super().__init__(f"Error al procesar el pago de ${monto:.2f}.")
+
+# ─────────────────────────────────────────────
+# CLASES DEL SISTEMA
+# ─────────────────────────────────────────────
+
+class Habitacion:
+    """Representa una habitación del hotel."""
+
+    def __init__(self, numero, tipo, precio_noche):
+        self.numero = numero
+        self.tipo = tipo               # "simple", "doble", "suite"
+        self.precio_noche = precio_noche
+        self.disponible = True
+
+    def __str__(self):
+        estado = "Disponible" if self.disponible else "Ocupada"
+        return f"Hab. {self.numero} ({self.tipo}) - ${self.precio_noche}/noche - {estado}"
+
+
+class Reserva:
+    """Representa una reserva de hotel."""
+
+    contador = 1
+
+    def __init__(self, cliente, habitacion, fecha_entrada, fecha_salida):
+        self.id = Reserva.contador
+        Reserva.contador += 1
+        self.cliente = cliente
+        self.habitacion = habitacion
+        self.fecha_entrada = fecha_entrada
+        self.fecha_salida = fecha_salida
+        noches = (fecha_salida - fecha_entrada).days
+        self.total = noches * habitacion.precio_noche
+
+    def __str__(self):
+        return (f"Reserva #{self.id} | Cliente: {self.cliente} | "
+                f"Hab. {self.habitacion.numero} | "
+                f"Entrada: {self.fecha_entrada.strftime('%d/%m/%Y')} | "
+                f"Salida: {self.fecha_salida.strftime('%d/%m/%Y')} | "
+                f"Total: ${self.total:.2f}")
+
+
+class SistemaHotel:
+    """Sistema principal del hotel con manejo de excepciones."""
+
+    SERVICIOS_DISPONIBLES = ["spa", "restaurante", "gimnasio", "piscina"]
+    SERVICIOS_NO_DISPONIBLES = ["sala_conferencias", "bar_nocturno"]
+
+    def __init__(self):
+        self.habitaciones = {
+            101: Habitacion(101, "simple", 80),
+            102: Habitacion(102, "simple", 80),
+            201: Habitacion(201, "doble", 150),
+            202: Habitacion(202, "doble", 150),
+            301: Habitacion(301, "suite", 300),
+        }
+        self.clientes_registrados = ["Ana Torres", "Luis Pérez", "María Gómez",
+                                     "Carlos Ruiz", "Laura Díaz"]
+        self.reservas = []
+        logger.info("Sistema de Reservas de Hotel iniciado correctamente.")
+
+    def _validar_fechas(self, fecha_entrada, fecha_salida):
+        """Valida que las fechas de reserva sean coherentes."""
+        if fecha_entrada >= fecha_salida:
+            raise ReservaInvalidaError("La fecha de entrada debe ser anterior a la de salida.")
+        if fecha_entrada < datetime.today().replace(hour=0, minute=0, second=0, microsecond=0):
+            raise ReservaInvalidaError("No se pueden hacer reservas en fechas pasadas.")
+
+    def _validar_cliente(self, nombre_cliente):
+        """Verifica que el cliente esté registrado."""
+        if nombre_cliente not in self.clientes_registrados:
+            raise ClienteNoEncontradoError(nombre_cliente)
+
+    def _procesar_pago(self, monto):
+        """Simula el procesamiento de pago (falla aleatoriamente en pruebas)."""
+        if monto <= 0:
+            raise PagoFallidoError(monto)
+        # Simulación: falla si el monto es exactamente 999 (caso de prueba de error)
+        if monto == 999:
+            raise PagoFallidoError(monto)
+
+    def hacer_reserva(self, nombre_cliente, numero_habitacion, fecha_entrada, fecha_salida):
+        """
+        Realiza una reserva con manejo completo de excepciones.
+        Usa try/except/else/finally y encadenamiento de excepciones.
+        """
+        logger.info(f"Intentando reserva: cliente={nombre_cliente}, hab={numero_habitacion}")
+        try:
+            # Validar cliente
+            self._validar_cliente(nombre_cliente)
+
+            # Validar habitación
+            if numero_habitacion not in self.habitaciones:
+                raise ReservaInvalidaError(f"La habitación {numero_habitacion} no existe.")
+            habitacion = self.habitaciones[numero_habitacion]
+            if not habitacion.disponible:
+                raise HabitacionNoDisponibleError(numero_habitacion)
+
+            # Validar fechas
+            self._validar_fechas(fecha_entrada, fecha_salida)
+
+            # Calcular reserva
+            nueva_reserva = Reserva(nombre_cliente, habitacion, fecha_entrada, fecha_salida)
+
+            # Procesar pago
+            try:
+                self._procesar_pago(nueva_reserva.total)
+            except PagoFallidoError as e:
+                # Encadenamiento de excepciones
+                raise ReservaInvalidaError("Fallo en el pago") from e
+
+        except (HabitacionNoDisponibleError, ReservaInvalidaError,
+                ClienteNoEncontradoError) as e:
+            logger.error(f"Error al hacer reserva: {e}")
+            print(f"  ❌ ERROR: {e}")
+            return None
+
+        except Exception as e:
+            logger.critical(f"Error inesperado en reserva: {e}")
+            print(f"  ❌ ERROR INESPERADO: {e}")
+            return None
+
+        else:
+            # Se ejecuta solo si NO hubo excepción
+            habitacion.disponible = False
+            self.reservas.append(nueva_reserva)
+            logger.info(f"Reserva exitosa: {nueva_reserva}")
+            print(f"  ✅ RESERVA CONFIRMADA: {nueva_reserva}")
+            return nueva_reserva
+
+        finally:
+            # Siempre se ejecuta
+            logger.debug(f"Proceso de reserva finalizado para cliente: {nombre_cliente}")
+
+    def cancelar_reserva(self, id_reserva):
+        """Cancela una reserva existente."""
+        logger.info(f"Intentando cancelar reserva #{id_reserva}")
+        try:
+            reserva = next((r for r in self.reservas if r.id == id_reserva), None)
+            if reserva is None:
+                raise ReservaInvalidaError(f"No existe la reserva con ID {id_reserva}.")
+            self.reservas.remove(reserva)
+            self.habitaciones[reserva.habitacion.numero].disponible = True
+            logger.info(f"Reserva #{id_reserva} cancelada correctamente.")
+            print(f"  ✅ Reserva #{id_reserva} cancelada.")
+        except ReservaInvalidaError as e:
+            logger.error(f"Error al cancelar: {e}")
+            print(f"  ❌ ERROR: {e}")
+        finally:
+            logger.debug(f"Proceso de cancelación para reserva #{id_reserva} finalizado.")
+
+    def solicitar_servicio(self, nombre_cliente, servicio):
+        """Solicita un servicio del hotel."""
+        logger.info(f"Solicitud de servicio: cliente={nombre_cliente}, servicio={servicio}")
+        try:
+            self._validar_cliente(nombre_cliente)
+            if servicio in self.SERVICIOS_NO_DISPONIBLES:
+                raise ServicioNoDisponibleError(servicio)
+            if servicio not in self.SERVICIOS_DISPONIBLES:
+                raise ReservaInvalidaError(f"El servicio '{servicio}' no existe.")
+            logger.info(f"Servicio '{servicio}' asignado a {nombre_cliente}.")
+            print(f"  ✅ Servicio '{servicio}' confirmado para {nombre_cliente}.")
+        except (ServicioNoDisponibleError, ClienteNoEncontradoError, ReservaInvalidaError) as e:
+            logger.error(f"Error en servicio: {e}")
+            print(f"  ❌ ERROR: {e}")
+        finally:
+            logger.debug(f"Solicitud de servicio finalizada para {nombre_cliente}.")
+
+    def mostrar_habitaciones(self):
+        """Muestra el estado actual de todas las habitaciones."""
+        print("\n  === ESTADO DE HABITACIONES ===")
+        for hab in self.habitaciones.values():
+            print(f"  {hab}")
+        logger.info("Estado de habitaciones consultado.")
+
+
+# ─────────────────────────────────────────────
+# SIMULACIONES (mínimo 10)
+# ─────────────────────────────────────────────
+
+def ejecutar_simulaciones():
+    """Ejecuta al menos 10 simulaciones válidas e inválidas."""
+    hotel = SistemaHotel()
+    hoy = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    print("=" * 60)
+    print("  SISTEMA DE RESERVAS DE HOTEL - SIMULACIONES")
+    print("=" * 60)
+
+    # ── SIM 1: Reserva válida ──
+    print("\n[SIM 1] Reserva válida - Ana Torres, Hab. 101")
+    hotel.hacer_reserva("Ana Torres", 101, hoy + timedelta(days=1), hoy + timedelta(days=3))
+
+    # ── SIM 2: Reserva válida ──
+    print("\n[SIM 2] Reserva válida - Luis Pérez, Hab. 201")
+    hotel.hacer_reserva("Luis Pérez", 201, hoy + timedelta(days=2), hoy + timedelta(days=5))
+
+    # ── SIM 3: Habitación ya ocupada ──
+    print("\n[SIM 3] Habitación ocupada - María Gómez intenta reservar Hab. 101")
+    hotel.hacer_reserva("María Gómez", 101, hoy + timedelta(days=1), hoy + timedelta(days=2))
+
+    # ── SIM 4: Cliente no registrado ──
+    print("\n[SIM 4] Cliente no registrado - Pedro Fictional")
+    hotel.hacer_reserva("Pedro Fictional", 102, hoy + timedelta(days=1), hoy + timedelta(days=2))
+
+    # ── SIM 5: Fechas inválidas (entrada >= salida) ──
+    print("\n[SIM 5] Fechas inválidas - entrada igual a salida")
+    hotel.hacer_reserva("Carlos Ruiz", 102, hoy + timedelta(days=3), hoy + timedelta(days=3))
+
+    # ── SIM 6: Fecha en el pasado ──
+    print("\n[SIM 6] Fecha en el pasado")
+    hotel.hacer_reserva("Laura Díaz", 102, hoy - timedelta(days=2), hoy - timedelta(days=1))
+
+    # ── SIM 7: Habitación inexistente ──
+    print("\n[SIM 7] Habitación que no existe (Hab. 999)")
+    hotel.hacer_reserva("Ana Torres", 999, hoy + timedelta(days=1), hoy + timedelta(days=2))
+
+    # ── SIM 8: Reserva válida en suite ──
+    print("\n[SIM 8] Reserva válida - María Gómez, Suite 301")
+    hotel.hacer_reserva("María Gómez", 301, hoy + timedelta(days=1), hoy + timedelta(days=4))
+
+    # ── SIM 9: Servicio válido ──
+    print("\n[SIM 9] Solicitud de servicio válida - Ana Torres, spa")
+    hotel.solicitar_servicio("Ana Torres", "spa")
+
+    # ── SIM 10: Servicio no disponible ──
+    print("\n[SIM 10] Servicio no disponible - bar_nocturno")
+    hotel.solicitar_servicio("Luis Pérez", "bar_nocturno")
+
+    # ── SIM 11: Servicio con cliente no registrado ──
+    print("\n[SIM 11] Servicio con cliente no registrado")
+    hotel.solicitar_servicio("Fantasma X", "gimnasio")
+
+    # ── SIM 12: Cancelar reserva válida ──
+    print("\n[SIM 12] Cancelar reserva existente (ID #1)")
+    hotel.cancelar_reserva(1)
+
+    # ── SIM 13: Cancelar reserva inexistente ──
+    print("\n[SIM 13] Cancelar reserva que no existe (ID #99)")
+    hotel.cancelar_reserva(99)
+
+    # ── SIM 14: Reservar habitación liberada tras cancelación ──
+    print("\n[SIM 14] Reservar Hab. 101 luego de cancelarla")
+    hotel.hacer_reserva("Carlos Ruiz", 101, hoy + timedelta(days=5), hoy + timedelta(days=7))
+
+    # Estado final
+    hotel.mostrar_habitaciones()
+
+    print("\n" + "=" * 60)
+    print("  Simulaciones finalizadas. Revise 'hotel_log.txt' para el log.")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    ejecutar_simulaciones()
