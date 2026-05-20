@@ -21,10 +21,6 @@ Sistema de gestión de reservas de hotel desarrollado en **Python** con enfoque 
 | Nombre | Usuario GitHub | Rama |
 |--------|---------------|------|
 | Daniel Alejandro Guio | @daniel-guio | `feature/daniel` |
-| [Nombre Integrante 2] | @usuario2 | `feature/integrante2` |
-| [Nombre Integrante 3] | @usuario3 | `feature/integrante3` |
-| [Nombre Integrante 4] | @usuario4 | `feature/integrante4` |
-| [Nombre Integrante 5] | @usuario5 | `feature/integrante5` |
 
 ---
 
