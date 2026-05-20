@@ -1,0 +1,44 @@
+2026-05-20 19:43:47 | INFO | Sistema de Reservas de Hotel iniciado correctamente.
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Ana Torres, hab=101
+2026-05-20 19:43:47 | INFO | Reserva exitosa: Reserva #1 | Cliente: Ana Torres | Hab. 101 | Entrada: 21/05/2026 | Salida: 23/05/2026 | Total: $160.00
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Ana Torres
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Luis Pérez, hab=201
+2026-05-20 19:43:47 | INFO | Reserva exitosa: Reserva #2 | Cliente: Luis Pérez | Hab. 201 | Entrada: 22/05/2026 | Salida: 25/05/2026 | Total: $450.00
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Luis Pérez
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=María Gómez, hab=101
+2026-05-20 19:43:47 | ERROR | Error al hacer reserva: La habitación 101 no está disponible.
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: María Gómez
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Pedro Fictional, hab=102
+2026-05-20 19:43:47 | ERROR | Error al hacer reserva: Cliente 'Pedro Fictional' no encontrado en el sistema.
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Pedro Fictional
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Carlos Ruiz, hab=102
+2026-05-20 19:43:47 | ERROR | Error al hacer reserva: Reserva inválida: La fecha de entrada debe ser anterior a la de salida.
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Carlos Ruiz
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Laura Díaz, hab=102
+2026-05-20 19:43:47 | ERROR | Error al hacer reserva: Reserva inválida: No se pueden hacer reservas en fechas pasadas.
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Laura Díaz
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Ana Torres, hab=999
+2026-05-20 19:43:47 | ERROR | Error al hacer reserva: Reserva inválida: La habitación 999 no existe.
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Ana Torres
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=María Gómez, hab=301
+2026-05-20 19:43:47 | INFO | Reserva exitosa: Reserva #3 | Cliente: María Gómez | Hab. 301 | Entrada: 21/05/2026 | Salida: 24/05/2026 | Total: $900.00
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: María Gómez
+2026-05-20 19:43:47 | INFO | Solicitud de servicio: cliente=Ana Torres, servicio=spa
+2026-05-20 19:43:47 | INFO | Servicio 'spa' asignado a Ana Torres.
+2026-05-20 19:43:47 | DEBUG | Solicitud de servicio finalizada para Ana Torres.
+2026-05-20 19:43:47 | INFO | Solicitud de servicio: cliente=Luis Pérez, servicio=bar_nocturno
+2026-05-20 19:43:47 | ERROR | Error en servicio: El servicio 'bar_nocturno' no está disponible en este momento.
+2026-05-20 19:43:47 | DEBUG | Solicitud de servicio finalizada para Luis Pérez.
+2026-05-20 19:43:47 | INFO | Solicitud de servicio: cliente=Fantasma X, servicio=gimnasio
+2026-05-20 19:43:47 | ERROR | Error en servicio: Cliente 'Fantasma X' no encontrado en el sistema.
+2026-05-20 19:43:47 | DEBUG | Solicitud de servicio finalizada para Fantasma X.
+2026-05-20 19:43:47 | INFO | Intentando cancelar reserva #1
+2026-05-20 19:43:47 | INFO | Reserva #1 cancelada correctamente.
+2026-05-20 19:43:47 | DEBUG | Proceso de cancelación para reserva #1 finalizado.
+2026-05-20 19:43:47 | INFO | Intentando cancelar reserva #99
+2026-05-20 19:43:47 | ERROR | Error al cancelar: Reserva inválida: No existe la reserva con ID 99.
+2026-05-20 19:43:47 | DEBUG | Proceso de cancelación para reserva #99 finalizado.
+2026-05-20 19:43:47 | INFO | Intentando reserva: cliente=Carlos Ruiz, hab=101
+2026-05-20 19:43:47 | INFO | Reserva exitosa: Reserva #4 | Cliente: Carlos Ruiz | Hab. 101 | Entrada: 25/05/2026 | Salida: 27/05/2026 | Total: $160.00
+2026-05-20 19:43:47 | DEBUG | Proceso de reserva finalizado para cliente: Carlos Ruiz
+2026-05-20 19:43:47 | INFO | Estado de habitaciones consultado.
